@@ -1,0 +1,166 @@
+services: 
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    networks: 
+      - mediarr 
+    environment:
+      - PUID=
+      - PGID=
+    volumes:
+      - ./config/jellyfin:/config
+      - ./media/tv:/data/tvshows
+      - ./media/movies:/data/movies
+    ports:
+      - 8096:8096
+      - 8920:8920 #optional
+      - 7359:7359/udp #optional
+      - 1900:1900/udp #optional
+    restart: unless-stopped
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    networks: 
+      - mediarr 
+    environment:
+      - LOG_LEVEL=debug
+    ports:
+      - 5055:5055
+    volumes:
+      - ./config/jellyseerr:/app/config
+    restart: unless-stopped
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    networks: 
+      - mediarr 
+    environment:
+      - PUID=
+      - PGID=
+    volumes:
+      - ./config/prowlarr:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:develop
+    container_name: sonarr
+    networks: 
+      - mediarr 
+    environment:
+      - PUID=
+      - PGID=
+    volumes:
+      - ./config/sonarr:/config
+      - ./media/tv:/tv #optional
+      - ./media/downloads:/downloads #optional
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    networks: 
+      - mediarr 
+    environment:
+      - PUID=
+      - PGID=
+    volumes:
+      - ./config/radarr:/config
+      - ./media/movies:/movies #optional
+      - ./media/downloads:/downloads #optional
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    networks: 
+      - mediarr 
+    environment:
+      - PUID=
+      - PGID=
+    volumes:
+      - ./config/bazarr:/config
+      - ./media/movies:/movies #optional
+      - ./media/tv:/tv #optional
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    networks: 
+      - mediarr 
+    environment:
+      - PUID=
+      - PGID=
+      - WEBUI_PORT=8080
+    volumes:
+      - ./config/qbittorrent:/config
+      - ./media/downloads:/downloads
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    restart: unless-stopped
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr
+    container_name: recyclarr
+    networks: 
+      - mediarr 
+    volumes:
+      - ./config/recyclarr:/config
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    networks: 
+      - mediarr 
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=Europe/London
+    ports:
+      - "${PORT:-8191}:8191"
+    restart: unless-stopped     
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    networks: 
+      - mediarr 
+    ports:
+      - 3000:3000
+    volumes:
+      - ./config/homepage:/app/config # Make sure your local config directory exists
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+    restart: unless-stopped
+  adguardhome:
+    image: adguard/adguardhome
+    ports:
+      - 53:53/tcp # plain dns over tcp
+      - 53:53/udp # plain dns over udp
+      - 82:80/tcp # http web interface
+      - 3001:3000/tcp # initial setup web interface
+    volumes:
+      - ./config/adguardhome:/opt/adguardhome/conf # app configuration
+      - ./work/adguardhome:/opt/adguardhome/work # app working directory
+    restart: unless-stopped
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    networks: 
+      - mediarr 
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data/nginx:/data
+      - ./letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
+networks: 
+  mediarr: 
+    driver: bridge
+    
