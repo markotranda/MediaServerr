@@ -29,8 +29,7 @@ services:
       - ${PATH_TO_APPDATA}/jellyseerr/config:/app/config
     restart: unless-stopped
     networks: 
-      - mediarr 
-  prowlarr:
+      - mediarr
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
