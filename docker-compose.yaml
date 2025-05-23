@@ -142,6 +142,20 @@ services:
     restart: unless-stopped
     networks:
       - mediarr
+  filebrowser:
+    image: hurlenko/filebrowser
+    container_name: filebrowser
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    ports:
+      - 8087:8080
+    volumes:
+      - /:/data
+      - ${PATH_TO_APPDATA}/filebrowser/config:/config
+    restart: unless-stopped
+    networks:
+      - mediarr
 networks: 
   mediarr: 
     driver: bridge
