@@ -155,6 +155,24 @@ services:
     restart: unless-stopped
     networks:
       - mediarr
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    networks:
+      - servarr_bridge
+    ports:
+      - 80:80
+      - 81:81
+      - 443:443
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${PATH_TO_APPDATA}/nginx/config:/data
+      - ${PATH_TO_APPDATA}/nginx/letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
+    networks:
+      - mediarr
 networks: 
   mediarr: 
     driver: bridge
