@@ -117,13 +117,6 @@ services:
     restart: unless-stopped
     networks: 
       - mediarr 
-  recyclarr-cron:
-    image: alpine
-    container_name: recyclarr-cron
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: >
-      sh -c "echo '0 4 * * * docker exec recyclarr recyclarr sync' | crontab - && crond -f"
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
